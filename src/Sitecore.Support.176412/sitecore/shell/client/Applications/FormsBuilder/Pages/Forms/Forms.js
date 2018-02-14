@@ -123,6 +123,8 @@
                             sc_formmode: "edit"
                         };
 
+                        this.filterDuplicateItems();
+
                         var baseUrl = speak.Helpers.url.addQueryParameters(formDesignerUrl, options);
                         this.DataSource.Items.forEach(function (item) {
                             item.$url = speak.Helpers.url.addQueryParameters(baseUrl, { formId: item.$itemId });
@@ -146,6 +148,44 @@
 
                     this.ContextToggle.IsEnabled = this.DataSource.HasData;
                     this.ContextToggle.IsOpen = !this.DataSource.HasData ? false : currentState.ContextToggleIsOpen;
+                },
+
+                filterDuplicateItems: function () {
+                    var result = this.DataSource.Items;
+                    var arrResult = new Array();
+
+                    result.forEach(function (item) {
+                        var valid = true;
+                        if (arrResult.length >= 1) {
+                            arrResult.forEach(function (element) {
+                                if (item.$itemId == element) {
+                                    valid = false;
+                                }
+                            });
+                            if (valid) {
+                                arrResult.push(item.$itemId);
+                            }
+                        }
+                        else {
+                            arrResult.push(item.$itemId);
+                        }
+                    });
+
+                    arrResult.forEach(function (element) {
+                        var count = 0;
+                        result.slice(0).forEach(function (item) {
+                            if (element == item.$itemId) {
+                                if (count >= 1) {
+                                    result.splice(result.indexOf(item), 1);
+                                }
+                                else {
+                                    count++;
+                                }
+                            }
+                        });
+                    });
+
+                    this.DataSource.Items = result;
                 },
 
                 fillOverviewTab: function (selectedItems) {
